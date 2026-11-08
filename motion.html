@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>피자 실적 세 가지 신호</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+:root{
+  --bg:#0B0D12; --bg2:#12151D; --ink:#F4F1EA; --muted:#8A8F98; --line:#262A33;
+  --accent:#F2B544; --up:#3DDC97; --down:#FF5A5F; --blue:#5B8CFF;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#000;color:var(--ink);overflow:hidden;
+  font-family:Pretendard,"Malgun Gothic","Apple SD Gothic Neo",sans-serif}
+#stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;transform-origin:center;
+  background:radial-gradient(1200px 700px at 70% 30%,#161a24 0%,var(--bg) 60%);overflow:hidden}
+.grid{position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:120px 120px;opacity:.35}
+.scene{position:absolute;inset:0;padding:120px 160px;display:flex;flex-direction:column;justify-content:center;visibility:hidden}
+.bgnum{position:absolute;right:80px;bottom:-120px;font-size:720px;font-weight:900;line-height:1;color:transparent;
+  -webkit-text-stroke:2px #232733;letter-spacing:-.05em;pointer-events:none}
+.ch{display:inline-block;will-change:transform}
+.w{display:inline-block;will-change:transform}
+.num{font-size:30px;font-weight:700;letter-spacing:.32em;color:var(--accent)}
+.title{font-size:108px;font-weight:800;line-height:1.12;letter-spacing:-.035em;margin:26px 0 70px}
+.title em{font-style:normal;color:var(--accent);position:relative;display:inline-block}
+.title em .bar{position:absolute;left:-6px;right:-6px;bottom:6px;height:22px;background:var(--accent);opacity:.22;transform-origin:left;z-index:-1}
+.kicker{font-size:28px;letter-spacing:.3em;color:var(--muted);font-weight:600}
+/* intro */
+#s0 .big{font-size:250px;font-weight:900;letter-spacing:-.05em;line-height:1;margin-top:30px}
+#s0 .big2{font-size:120px;font-weight:800;letter-spacing:-.03em;color:var(--muted);margin-top:10px}
+#s0 .sig{display:flex;align-items:flex-end;gap:28px;margin-top:40px}
+#s0 .three{font-size:300px;font-weight:900;color:var(--accent);line-height:.8}
+#s0 .rest{font-size:110px;font-weight:800;padding-bottom:14px}
+/* stats */
+.stats{display:flex;gap:56px}
+.stat{flex:1;border-top:6px solid var(--muted);padding-top:30px}
+.stat .label{font-size:40px;color:var(--muted);font-weight:600}
+.stat .val{font-size:176px;font-weight:900;letter-spacing:-.04em;line-height:1.05;font-variant-numeric:tabular-nums}
+.stat .sub{font-size:30px;color:var(--muted);margin-top:8px}
+.stat.up{border-color:var(--up)} .stat.up .val{color:var(--up)}
+.stat.down{border-color:var(--down)} .stat.down .val{color:var(--down)}
+.stat.gold{border-color:var(--accent)} .stat.gold .val{color:var(--accent)}
+.foot{margin-top:56px;font-size:32px;color:var(--muted);letter-spacing:.04em}
+/* bars */
+.bars{display:flex;flex-direction:column;gap:40px}
+.brow{display:grid;grid-template-columns:420px 1fr 220px;align-items:center;gap:36px}
+.brow .bl{font-size:44px;font-weight:700}
+.track{height:84px;background:#1A1E28;position:relative;overflow:hidden}
+.fill{position:absolute;inset:0;transform-origin:left;transform:scaleX(0)}
+.brow .bv{font-size:84px;font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:-.03em}
+.strip{margin-top:64px;display:flex;align-items:center;gap:32px;font-size:44px;font-weight:700;
+  border:3px solid var(--accent);padding:26px 40px;align-self:flex-start}
+.strip .tag{background:var(--accent);color:#111;padding:8px 18px;font-size:34px;font-weight:800}
+.strip b{color:var(--down)}
+/* scatter */
+.row3{display:grid;grid-template-columns:640px 1fr;gap:70px;align-items:center}
+.callout .lab{font-size:36px;color:var(--muted);font-weight:600}
+.callout .hv{font-size:150px;font-weight:900;color:var(--down);letter-spacing:-.04em;line-height:1}
+.callout .hd{font-size:52px;font-weight:800;margin:10px 0 40px}
+.callout .rr{font-size:40px;font-weight:700;border-top:3px solid var(--line);padding-top:28px}
+.callout .rr span{color:var(--accent);font-size:72px;font-weight:900;margin-left:14px}
+svg text{font-family:Pretendard,"Malgun Gothic",sans-serif}
+/* outro */
+#s4{align-items:flex-start}
+#s4 .l1,#s4 .l2{font-size:150px;font-weight:900;letter-spacing:-.045em;line-height:1.15}
+#s4 em{font-style:normal;color:var(--accent)}
+#s4 .sig2{margin-top:60px;font-size:30px;color:var(--muted);letter-spacing:.2em}
+#wipe{position:absolute;inset:0;transform:scaleX(0);z-index:20}
+#tc{position:absolute;left:160px;bottom:56px;font-size:24px;letter-spacing:.2em;color:#4a4f5a;font-variant-numeric:tabular-nums;z-index:21}
+#prog{position:absolute;left:0;bottom:0;height:8px;width:100%;background:var(--accent);transform-origin:left;transform:scaleX(0);z-index:21}
+/* overlay & controls (page scale) */
+#overlay{position:fixed;inset:0;background:rgba(5,6,9,.88);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.panel{max-width:560px;width:100%;text-align:center}
+.panel h1{font-size:30px;font-weight:800;margin-bottom:10px}
+.panel p{color:var(--muted);font-size:15px;line-height:1.6;margin-bottom:22px}
+#play{font:inherit;font-size:22px;font-weight:800;background:var(--accent);color:#111;border:0;padding:16px 44px;cursor:pointer}
+#play:hover{filter:brightness(1.1)}
+.vrow{margin-top:22px;display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;font-size:14px;color:var(--muted)}
+select{font:inherit;font-size:14px;background:#151922;color:var(--ink);border:1px solid #333;padding:6px 8px;max-width:100%}
+#vnote{margin-top:12px;font-size:13px;color:var(--accent);min-height:1em}
+#ctrl{position:fixed;right:16px;bottom:16px;display:flex;gap:8px;z-index:40;opacity:0;transition:opacity .3s}
+body:hover #ctrl{opacity:1}
+#ctrl button{font:inherit;font-size:14px;font-weight:700;background:#1b1f29;color:var(--ink);border:1px solid #333;padding:8px 14px;cursor:pointer}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="grid"></div>
+
+  <!-- 0. 인트로 -->
+  <section class="scene" id="s0">
+    <div class="kicker">PIZZA FRANCHISE · 2020.01 – 2026.08</div>
+    <div class="big split">9개 매장</div>
+    <div class="big2 split">80개월의 실적</div>
+    <div class="sig"><span class="three">3</span><span class="rest">가지 신호</span></div>
+  </section>
+
+  <!-- 1. 성장의 엔진 -->
+  <section class="scene" id="s1">
+    <div class="bgnum">01</div>
+    <div class="num">01 / 03 · 성장의 질</div>
+    <h2 class="title">
+      <span class="w">성장은</span> <span class="w"><em><i class="bar"></i>고객</em>이</span> <span class="w">아니라</span><br>
+      <span class="w"><em><i class="bar"></i>객단가</em>가</span> <span class="w">만들었다</span>
+    </h2>
+    <div class="stats">
+      <div class="stat up"><div class="label">매출</div><div class="val">+<span id="c1">0</span>%</div><div class="sub">93.5억 → 109.5억</div></div>
+      <div class="stat down"><div class="label">주문 수</div><div class="val">−<span id="c2">0</span>%</div><div class="sub">하루 141건 → 139건</div></div>
+      <div class="stat gold"><div class="label">객단가</div><div class="val">+<span id="c3">0</span>%</div><div class="sub">2.53만 → 3.00만 원</div></div>
+    </div>
+    <div class="foot">2022 → 2025 · 9개 매장 합계 · 신규 고객 월 400명 안팎에서 정체</div>
+  </section>
+
+  <!-- 2. 인건비 -->
+  <section class="scene" id="s2">
+    <div class="bgnum">02</div>
+    <div class="num">02 / 03 · 이익 구조</div>
+    <h2 class="title">
+      <span class="w"><em><i class="bar"></i>인건비</em>가</span> <span class="w">이익률을</span> <span class="w">깎고</span> <span class="w">있다</span>
+    </h2>
+    <div class="bars">
+      <div class="brow"><div class="bl">객단가 상승</div><div class="track"><div class="fill" id="f1" style="background:var(--accent)"></div></div><div class="bv" style="color:var(--accent)">+<span id="c4">0</span>%</div></div>
+      <div class="brow"><div class="bl">1인당 인건비 상승</div><div class="track"><div class="fill" id="f2" style="background:var(--down)"></div></div><div class="bv" style="color:var(--down)">+<span id="c5">0</span>%</div></div>
+      <div class="brow"><div class="bl">영업이익률</div><div class="bv" style="grid-column:2/4;font-size:72px">18.0% <span style="color:var(--muted)">→</span> <span style="color:var(--down)" id="c6">18.0</span><span style="color:var(--down)">%</span></div></div>
+    </div>
+    <div class="strip"><span class="tag">2026 1~8월</span><span>이익률 +1.0%p 반등 · 그러나 인건비율은 <b>29.0%</b>로 계속 상승</span></div>
+  </section>
+
+  <!-- 3. 임대료 -->
+  <section class="scene" id="s3">
+    <div class="bgnum">03</div>
+    <div class="num">03 / 03 · 매장 포트폴리오</div>
+    <h2 class="title" style="margin-bottom:50px">
+      <span class="w">큰</span> <span class="w">매장일수록</span> <span class="w">이익률은</span> <span class="w">낮다</span><br>
+      <span class="w">차이는</span> <span class="w"><em><i class="bar"></i>임대료</em>가</span> <span class="w">만든다</span>
+    </h2>
+    <div class="row3">
+      <div class="callout">
+        <div class="lab">매출 1·2위 · 강남 · 홍대</div>
+        <div class="hv">15.5%</div>
+        <div class="hd">이익률은 9개 매장 중 최하</div>
+        <div class="rr">임차료율 6% vs 타 매장 3~4%</div>
+        <div class="rr" style="border:0;padding-top:10px">이익률–임차료율 상관<span>−0.92</span></div>
+      </div>
+      <svg id="sc" viewBox="0 0 880 520" width="1000" height="560">
+        <line x1="60" y1="480" x2="860" y2="480" stroke="#3a3f4a" stroke-width="2"/>
+        <line x1="60" y1="10" x2="60" y2="480" stroke="#3a3f4a" stroke-width="2"/>
+        <text x="860" y="512" text-anchor="end" fill="#8A8F98" font-size="24">임차료율 →</text>
+        <text x="72" y="30" fill="#8A8F98" font-size="24">↑ 영업이익률</text>
+        <line id="trend" x1="230" y1="200" x2="770" y2="415" stroke="#F2B544" stroke-width="4" stroke-dasharray="12 10"/>
+        <g id="dots"></g>
+      </svg>
+    </div>
+  </section>
+
+  <!-- 4. 아웃트로 -->
+  <section class="scene" id="s4">
+    <div class="l1 split">고객을 <em>늘리고</em>,</div>
+    <div class="l2 split">비용 구조를 <em>바꿀</em> 때.</div>
+    <div class="sig2">피자 9개 매장 실적 분석 · 2020.01 – 2026.08</div>
+  </section>
+
+  <div id="wipe"></div>
+  <div id="tc">00:00 / 00:30</div>
+  <div id="prog"></div>
+</div>
+
+<div id="overlay">
+  <div class="panel">
+    <h1>세 가지 신호 · 30초</h1>
+    <p>키네틱 타이포그래피와 내레이션으로 보는 피자 9개 매장 실적.<br>소리를 켜고 재생하세요.</p>
+    <button id="play">▶ 재생</button>
+    <div class="vrow"><label for="vsel">내레이션 음성</label><select id="vsel"></select></div>
+    <div id="vnote"></div>
+  </div>
+</div>
+<div id="ctrl"><button id="bPause">일시정지</button><button id="bReplay">다시 재생</button></div>
+
+<script>
+/* ---------- 무대 크기 맞춤 ---------- */
+const stage=document.getElementById('stage');
+function fit(){const s=Math.min(innerWidth/1920,innerHeight/1080);stage.style.transform=`translate(-50%,-50%) scale(${s})`;}
+addEventListener('resize',fit);fit();
+
+/* ---------- 글자 단위 분해 (em 등 내부 태그 유지) ---------- */
+function splitChars(el){
+  [...el.childNodes].forEach(n=>{
+    if(n.nodeType===3){
+      const f=document.createDocumentFragment();
+      [...n.textContent].forEach(c=>{const s=document.createElement('span');s.className='ch';s.innerHTML=c===' '?'&nbsp;':c;f.appendChild(s);});
+      n.replaceWith(f);
+    }else if(n.nodeType===1&&!n.classList.contains('bar'))splitChars(n);
+  });
+}
+document.querySelectorAll('.split').forEach(splitChars);
+const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
+
+/* ---------- 산점도 점 (매장별 임차료율·영업이익률, 2020.01~2026.08) ---------- */
+/* [매장, 임차료율, 영업이익률, 라벨 dx, 라벨 dy, 정렬] — 라벨이 겹치지 않도록 위치 지정 */
+const stores=[["둔산",3.4,18.4,0,-26,"middle"],["부평",3.7,18.1,22,8,"start"],["연동",3.2,17.6,0,-26,"middle"],
+              ["충장로",3.3,17.4,0,42,"middle"],["영통",3.6,17.4,0,-26,"middle"],["서면",4.2,17.3,22,8,"start"],
+              ["동성로",3.9,17.1,0,42,"middle"],["홍대",5.9,15.6,-34,10,"end"],["강남",6.1,15.5,0,64,"middle"]];
+const g=$('#dots');
+stores.forEach(([n,r,o,dx,dy,an])=>{
+  const x=60+(r-3)/3.5*780, y=20+(19-o)/4*440, hot=r>5;
+  g.insertAdjacentHTML('beforeend',`<g class="dot" transform="translate(${x.toFixed(1)},${y.toFixed(1)})">
+    <circle r="${hot?20:14}" fill="${hot?'#FF5A5F':'#8A8F98'}"/>
+    <text x="${dx}" y="${dy}" text-anchor="${an}" fill="${hot?'#F4F1EA':'#8A8F98'}" font-size="${hot?32:22}" font-weight="${hot?800:600}">${n}${hot?' '+o+'%':''}</text></g>`);
+});
+
+/* ---------- 내레이션 ---------- */
+const LINES=[
+  "아홉 개 매장, 팔십 개월의 실적. 세 가지 신호가 보입니다.",
+  "첫째, 성장은 고객이 아니라 객단가가 만들었습니다. 매출은 17퍼센트 늘었지만, 주문은 줄었습니다.",
+  "둘째, 인건비가 이익률을 깎고 있습니다. 올해 반등은 아직 구조적인 회복이 아닙니다.",
+  "셋째, 매출이 큰 매장일수록 이익률은 낮습니다. 그 차이는 임대료가 만듭니다.",
+  "고객을 늘리고, 비용 구조를 바꿀 때입니다."
+];
+const MALE=/인준|InJoon|Hyunsu|현수|BongJin|GookMin|Male|남성|남자/i;
+const PREFER=[/인준|InJoon/i,/Hyunsu|현수/i,MALE];   // 신뢰감 있는 뉴스 톤 남성 음성 우선
+let voices=[], voice=null, voiceIsMale=false;
+const vsel=$('#vsel'), vnote=$('#vnote');
+function loadVoices(){
+  if(!('speechSynthesis' in window)){vnote.textContent='이 브라우저는 음성 합성을 지원하지 않습니다. 영상만 재생됩니다.';return;}
+  voices=speechSynthesis.getVoices();
+  const ko=voices.filter(v=>/^ko/i.test(v.lang));
+  const list=ko.length?ko:voices;
+  const prev=vsel.value;
+  vsel.innerHTML=list.map((v,i)=>`<option value="${v.name}">${v.name}${MALE.test(v.name)?' · 남성':''}</option>`).join('');
+  let pick=null;for(const re of PREFER){pick=list.find(v=>re.test(v.name));if(pick)break;}
+  pick=pick||list[0];
+  vsel.value=list.some(v=>v.name===prev)?prev:(pick?pick.name:'');
+  setVoice();
+}
+function setVoice(){
+  voice=voices.find(v=>v.name===vsel.value)||null;
+  voiceIsMale=!!voice&&MALE.test(voice.name);
+  vnote.textContent=!voice?'한국어 음성을 찾지 못했습니다.'
+    :voiceIsMale?'남성 내레이션 음성으로 재생합니다.'
+    :'이 브라우저에는 한국어 남성 음성이 없어 음높이를 낮춰 대신 씁니다. ';
+  if(voice&&!voiceIsMale&&location.protocol==='file:'){
+    vnote.insertAdjacentHTML('beforeend','<a href="microsoft-edge:'+location.href+'" style="color:var(--ink)">Microsoft Edge로 열기 → 남성 음성 ‘인준’</a>');
+  }
+}
+if('speechSynthesis' in window){loadVoices();speechSynthesis.onvoiceschanged=loadVoices;}
+vsel.addEventListener('change',setVoice);
+
+function say(i){
+  if(!voice)return;
+  const u=new SpeechSynthesisUtterance(LINES[i]);
+  u.voice=voice;u.lang=voice.lang||'ko-KR';
+  u.rate=voiceIsMale?1.08:1.05;           // 또렷하고 단단한 속도
+  u.pitch=voiceIsMale?0.85:0.55;          // 낮은 톤으로 무게감
+  u.volume=1;
+  speechSynthesis.speak(u);
+}
+/* 장면 경계에서 앞 문장이 끝나지 않았으면 잠시 기다려 화면과 목소리를 맞춘다 */
+let userPaused=false;
+function gate(){
+  if(!voice||!(speechSynthesis.speaking||speechSynthesis.pending))return;
+  tl.pause();const t0=performance.now();
+  const iv=setInterval(()=>{
+    if(!(speechSynthesis.speaking||speechSynthesis.pending)||performance.now()-t0>2500){
+      clearInterval(iv);if(!userPaused)tl.resume();
+    }
+  },40);
+}
+
+/* ---------- 타임라인 ---------- */
+const tl=gsap.timeline({paused:true});
+const E={out:'power3.out',back:'back.out(1.8)',expo:'expo.out'};
+function count(sel,to,t,dur,dec=0,from=0){
+  tl.fromTo(sel,{textContent:from},{textContent:to,duration:dur,ease:'power2.out',snap:{textContent:dec?0.1:1},
+    modifiers:{textContent:v=>(+v).toFixed(dec)}},t);
+}
+function wipe(t,color){
+  tl.set('#wipe',{background:color,transformOrigin:'left center',scaleX:0},t)
+    .to('#wipe',{scaleX:1,duration:.28,ease:'power3.in'},t)
+    .set('#wipe',{transformOrigin:'right center'},t+.29)
+    .to('#wipe',{scaleX:0,duration:.34,ease:'power3.out'},t+.3);
+}
+function voiceAt(i,t){if(t>0)tl.call(gate,null,t-.02);tl.call(say,[i],t);}
+function sceneIn(id,t){tl.set(id,{autoAlpha:1},t);tl.fromTo(`${id} .bgnum`,{xPercent:20,autoAlpha:0},{xPercent:-8,autoAlpha:1,duration:7.5,ease:'none'},t);}
+function sceneOut(id,t){tl.to(id,{autoAlpha:0,scale:1.06,filter:'blur(10px)',duration:.32,ease:'power2.in'},t);}
+function titleIn(id,t){
+  tl.from(`${id} .num`,{x:-60,autoAlpha:0,duration:.45,ease:E.out},t)
+    .from(`${id} .title .w`,{yPercent:110,rotationX:-80,autoAlpha:0,transformOrigin:'50% 100%',stagger:.09,duration:.6,ease:E.back},t+.15);
+}
+function hl(id,t){tl.from(`${id} em .bar`,{scaleX:0,duration:.5,stagger:.25,ease:E.expo},t)
+  .fromTo(`${id} em`,{scale:1},{scale:1.08,duration:.18,yoyo:true,repeat:1,stagger:.25,ease:'power1.inOut'},t);}
+
+/* 00.0 – 04.0 인트로 */
+tl.set('#s0',{autoAlpha:1},0);
+voiceAt(0,.15);
+tl.from('#s0 .kicker',{y:-30,autoAlpha:0,duration:.5,ease:E.out},.1)
+  .from('#s0 .big .ch',{yPercent:120,rotation:14,autoAlpha:0,stagger:.06,duration:.6,ease:E.back},.2)
+  .from('#s0 .big2 .ch',{x:-50,autoAlpha:0,stagger:.035,duration:.45,ease:E.out},1.1)
+  .from('#s0 .three',{scale:7,autoAlpha:0,duration:.7,ease:E.expo},2.15)
+  .from('#s0 .rest',{x:-40,autoAlpha:0,duration:.4,ease:E.out},2.5)
+  .to('#s0 .three',{rotation:-8,duration:.15,yoyo:true,repeat:1},2.9);
+sceneOut('#s0',3.62);wipe(3.66,'#F2B544');
+
+/* 04.0 – 12.0 메시지 1: 객단가가 만든 성장 */
+sceneIn('#s1',3.95);voiceAt(1,4.0);
+titleIn('#s1',4.0);hl('#s1',5.0);
+tl.from('#s1 .stat.up',{y:80,autoAlpha:0,duration:.5,ease:E.back},6.3);count('#c1',17,6.35,1.0);
+tl.from('#s1 .stat.down',{y:-80,autoAlpha:0,duration:.5,ease:E.back},7.9);count('#c2',1,7.95,.5);
+tl.to('#s1 .stat.down .val',{y:24,duration:.25,yoyo:true,repeat:1,ease:'power2.in'},8.45);
+tl.from('#s1 .stat.gold',{scale:1.6,autoAlpha:0,duration:.45,ease:E.expo},9.3);count('#c3',19,9.35,.8);
+tl.from('#s1 .foot',{y:30,autoAlpha:0,duration:.4,ease:E.out},10.1);
+sceneOut('#s1',11.6);wipe(11.64,'#FF5A5F');
+
+/* 12.0 – 20.0 메시지 2: 인건비 */
+sceneIn('#s2',11.95);voiceAt(2,12.0);
+titleIn('#s2',12.0);hl('#s2',13.0);
+tl.from('#s2 .brow',{x:-60,autoAlpha:0,stagger:.2,duration:.45,ease:E.out},13.7)
+  .to('#f1',{scaleX:19/28*.95,duration:1.2,ease:'power2.out'},14.0)
+  .to('#f2',{scaleX:.95,duration:1.6,ease:'power2.out'},14.2);
+count('#c4',19,14.0,1.2);count('#c5',28,14.2,1.6);
+count('#c6',16.8,15.9,.9,1,18.0);
+tl.to('#s2 .brow:nth-child(3) .bv',{x:12,duration:.06,yoyo:true,repeat:5},16.8);
+tl.from('#s2 .strip',{scaleX:0,transformOrigin:'left center',duration:.5,ease:E.expo},17.2)
+  .from('#s2 .strip > *',{autoAlpha:0,duration:.3},17.5);
+sceneOut('#s2',19.6);wipe(19.64,'#5B8CFF');
+
+/* 20.0 – 27.0 메시지 3: 임대료 */
+sceneIn('#s3',19.95);voiceAt(3,20.0);
+titleIn('#s3',20.0);hl('#s3',22.2);
+tl.from('#sc',{autoAlpha:0,duration:.4},20.8)
+  .from('#dots .dot',{y:-300,autoAlpha:0,stagger:.07,duration:.6,ease:'bounce.out'},21.0)
+  .from('#trend',{attr:{x2:230,y2:200},duration:.9,ease:'power2.inOut'},22.0)
+  .from('#s3 .callout > *',{x:-50,autoAlpha:0,stagger:.18,duration:.45,ease:E.out},22.6)
+  .fromTo('#dots .dot circle[r="20"]',{attr:{r:20}},{attr:{r:28},duration:.25,yoyo:true,repeat:3},23.4);
+sceneOut('#s3',26.62);wipe(26.66,'#F2B544');
+
+/* 27.0 – 30.0 아웃트로 */
+tl.set('#s4',{autoAlpha:1},26.95);voiceAt(4,27.0);
+tl.from('#s4 .l1 .ch',{yPercent:100,autoAlpha:0,stagger:.035,duration:.45,ease:E.back},27.05)
+  .from('#s4 .l2 .ch',{yPercent:100,autoAlpha:0,stagger:.035,duration:.45,ease:E.back},27.85)
+  .from('#s4 .sig2',{autoAlpha:0,y:20,duration:.4},28.9)
+  .to({},{duration:.01},30);   // 전체 길이 30초 고정
+
+/* 진행 표시 */
+const tc=$('#tc'),prog=$('#prog');
+const fmt=s=>'00:'+String(Math.min(30,Math.floor(s))).padStart(2,'0');
+gsap.ticker.add(()=>{tc.textContent=`${fmt(tl.time())} / 00:30`;prog.style.transform=`scaleX(${tl.progress()})`;});
+tl.eventCallback('onComplete',()=>{$('#bPause').textContent='일시정지';});
+
+/* ---------- 재생 제어 ---------- */
+function start(){
+  if('speechSynthesis' in window)speechSynthesis.cancel();
+  userPaused=false;$('#bPause').textContent='일시정지';
+  tl.restart();
+}
+$('#play').onclick=()=>{$('#overlay').style.display='none';start();};
+$('#bReplay').onclick=start;
+$('#bPause').onclick=()=>{
+  if(tl.progress()>=1)return;
+  userPaused=!userPaused;
+  if(userPaused){tl.pause();if(voice)speechSynthesis.pause();$('#bPause').textContent='계속';}
+  else{tl.resume();if(voice)speechSynthesis.resume();$('#bPause').textContent='일시정지';}
+};
+/* 특정 시점 미리보기: 파일주소#t=12.5 */
+const mt=location.hash.match(/t=([\d.]+)/);
+if(mt){$('#overlay').style.display='none';tl.seek(+mt[1],true);}
+addEventListener('keydown',e=>{if(e.code==='Space'&&$('#overlay').style.display==='none'){e.preventDefault();$('#bPause').click();}});
+</script>
+</body>
+</html>
